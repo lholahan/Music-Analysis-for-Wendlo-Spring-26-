@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wendlo Music Analysis | Client Report</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+    <style>
+        :root {
+            --primary: #C56B2F; --secondary: #6F3C8E; --accent: #6E9655; --gold: #D79A31;
+            --text: #2B2330; --background: #FBF7F2; --soft-orange: #F8E4D4;
+            --soft-purple: #E8DDF3; --soft-green: #E4F0DD; --soft-blue: #DFE9F7;
+            --border: #E8DCCA; --story-bg: #FFF9F5; --story-border: #F5C9A8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--background); color: var(--text); line-height: 1.65;
+            font-size: 17px; overflow-y: auto; overflow-x: hidden;
+        }
+        .page-wrapper {
+            max-width: 900px; margin: 0 auto; background: white;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08); min-height: 100vh;
+        }
+        .title-header {
+            text-align: center; padding: 2.5rem 2rem 2rem;
+            background: linear-gradient(135deg, var(--soft-purple) 0%, var(--soft-orange) 100%);
+            border-radius: 0 0 18px 18px; position: relative;
+        }
+        .title-header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 18px 18px 0 0;
+        }
+        .title-header h1 { font-size: 2.5rem; color: var(--text); margin-bottom: 0.8rem; font-weight: 700; line-height: 1.2; }
+        .title-header .subtitle { font-size: 1.3rem; color: var(--secondary); margin-bottom: 1.5rem; font-weight: 400; }
+        .title-header .tagline { font-size: 1.05rem; max-width: 650px; margin: 0 auto 1.8rem; font-style: italic; opacity: 0.95; line-height: 1.45; }
+        .title-header .story-box {
+            background: rgba(255, 255, 255, 0.96); border: 2px solid var(--story-border);
+            border-left: 6px solid var(--gold); border-radius: 14px; padding: 1.2rem 1.6rem;
+            margin: 0 auto 1.5rem; max-width: 660px; box-shadow: 0 5px 18px rgba(197, 107, 47, 0.1);
+            position: relative; text-align: left;
+        }
+        .title-header .story-box::before {
+            content: "💡"; position: absolute; top: -11px; left: 20px;
+            background: var(--gold); width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; color: white; font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
+        .title-header .story-box .story-title { font-weight: 700; color: var(--primary); font-size: 1.02rem; margin-bottom: 0.6rem; display: block; }
+        .title-header .story-box p { margin: 0.4rem 0; font-size: 0.96rem; color: var(--text); line-height: 1.5; }
+        .title-header .story-box .bottom-line { margin-top: 0.8rem; padding-top: 0.7rem; border-top: 1px dashed var(--border); font-weight: 600; color: var(--secondary); font-size: 0.98rem; }
+        .title-header .meta { font-size: 0.92rem; opacity: 0.85; color: var(--text); margin-bottom: 1rem; }
+        .content-main { padding: 1.5rem 2rem 2.5rem; }
+        section { margin-bottom: 2rem; padding-top: 1rem; }
+        h2 { font-size: 1.8rem; color: var(--primary); margin-bottom: 1.1rem; border-bottom: 3px solid var(--border); padding-bottom: 0.4rem; font-weight: 700; }
+        h3 { font-size: 1.3rem; color: var(--secondary); margin: 1.2rem 0 0.7rem; font-weight: 600; }
+        .story-box {
+            background: var(--story-bg); border: 2px solid var(--story-border);
+            border-left: 6px solid var(--gold); border-radius: 14px; padding: 1.2rem 1.5rem;
+            margin: 1.1rem 0; box-shadow: 0 4px 14px rgba(197, 107, 47, 0.09); position: relative;
+        }
+        .story-box::before {
+            content: "📊"; position: absolute; top: -11px; left: 20px;
+            background: var(--gold); width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; color: white; font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
+        .story-box .story-title { font-weight: 700; color: var(--primary); font-size: 1rem; margin-bottom: 0.6rem; display: block; }
+        .story-box p { margin: 0.4rem 0; font-size: 0.97rem; line-height: 1.55; }
+        .story-box .bottom-line { margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px dashed var(--border); font-weight: 600; color: var(--secondary); font-size: 0.98rem; }
+        .key-finding {
+            background: linear-gradient(135deg, var(--soft-orange) 0%, var(--soft-purple) 100%);
+            border-left: 6px solid var(--gold); padding: 1.1rem 1.5rem; margin: 1.1rem 0;
+            border-radius: 0 11px 11px 0; box-shadow: 0 4px 14px rgba(197, 107, 47, 0.08);
+        }
+        .key-finding .label {
+            display: inline-block; background: var(--gold); color: white;
+            padding: 0.2rem 0.75rem; border-radius: 999px; font-weight: 700;
+            font-size: 0.78rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .key-finding .statement { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; line-height: 1.35; }
+        .key-finding .evidence { font-size: 0.96rem; color: var(--text); opacity: 0.95; line-height: 1.55; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: white; border-radius: 11px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.06); font-size: 0.92rem; }
+        th { background: var(--primary); color: white; padding: 0.75rem 0.95rem; text-align: left; font-weight: 600; }
+        td { padding: 0.65rem 0.95rem; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: var(--soft-orange); }
+        .sig { color: var(--primary); font-weight: 700; }
+        .chart-container { width: 100%; height: 420px; background: white; border-radius: 12px; margin: 1rem 0 1.5rem; box-shadow: 0 3px 10px rgba(0,0,0,0.06); padding: 4px; }
+        ul { margin: 0.7rem 0; padding-left: 1.5rem; }
+        li { margin: 0.4rem 0; line-height: 1.6; font-size: 0.96rem; }
+        .report-footer { text-align: center; padding: 1.5rem 0 2rem; border-top: 2px solid var(--border); margin-top: 2rem; }
+        .report-footer p { font-size: 0.92rem; color: var(--secondary); opacity: 0.85; margin: 0.3rem 0; }
+        @media (max-width: 768px) {
+            .page-wrapper { border-radius: 0; }
+            .content-main { padding: 1.2rem 1.2rem 2rem; }
+            .title-header { padding: 2rem 1.2rem 1.5rem; }
+            h1 { font-size: 2rem; } h2 { font-size: 1.6rem; }
+            .chart-container { height: 340px; } .title-header h1 { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="title-header">
+            <h1>Wendlo's Report</h1>
+            <p class="subtitle">What the Data Shows About Your Songs' Popularity</p>
+            <p class="tagline">Analyzed and Compiled by Lynn Holahan<br>Presented by the Music Analytics Blue Team</p>
+            <div class="story-box">
+                <span class="story-title">What This Analysis Includes</span>
+                <p>• All 24 Wendlo songs with Spotify audio features (BPM, Energy, Happiness, etc.)</p>
+                <p>• Lyric emotion analysis using the NRC Emotion Lexicon</p>
+                <p>• Statistical modeling to identify what predicts popularity</p>
+                <p>• Validation on May Erlewine and Jackie Evans catalogs for generalizability testing</p>
+                <p class="bottom-line">As of April 2026</p>
+            </div>
+            <p class="meta">Interactive • Scroll to Read • Hover for More Details</p>
+        </header>
+
+        <main class="content-main">
+            <section>
+                <h2>🎯 The Most Important Finding</h2>
+                <div class="key-finding">
+                    <span class="label">Statistical Result</span>
+                    <div class="statement">Happiness is the Only Statistically Significant Predictor</div>
+                    <div class="evidence">
+                        When controlling for all other audio features (BPM, Liveness, Energy, etc.), <strong>only Happiness maintains statistical significance</strong> (p = 0.038). This means emotional tone explains unique variance in popularity beyond what tempo or production style can explain.
+                    </div>
+                </div>
+                <div class="story-box">
+                    <span class="story-title">What This Means in Plain English</span>
+                    <p>After testing every combination of musical features, the data shows that <strong>how uplifting a song feels</strong> is the strongest signal for streaming engagement in your catalog.</p>
+                    <p>Tempo and "live feel" showed some association, but their effects appear to work through or alongside emotional tone—not independently.</p>
+                    <p class="bottom-line">🎵 Your authentic, hopeful emotional voice is your data-backed superpower.</p>
+                </div>
+                <h3>Supporting Statistics</h3>
+                <table>
+                    <thead><tr><th>Predictor</th><th>p-value</th><th>Significance</th><th>Interpretation</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Happiness</strong></td><td class="sig">0.038</td><td class="sig">*</td><td>Statistically significant</td></tr>
+                        <tr><td>BPM</td><td>0.089</td><td>·</td><td>Marginally significant</td></tr>
+                        <tr><td>Liveness</td><td>0.124</td><td></td><td>Not significant at α=0.05</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:0.82rem; opacity:0.75; margin-top:0.3rem">* p &lt; 0.05 significance threshold • Type III ANOVA from R code</p>
+            </section>
+
+            <section>
+                <h2>🗺️ Your Songs on the Emotion Map</h2>
+                <div class="story-box">
+                    <span class="story-title">What This Visual Shows</span>
+                    <p>This scatterplot maps each song using two dimensions from the Spotify analysis:</p>
+                    <p>• <strong>Horizontal</strong> = Happiness score (0-100): how uplifting/positive the song feels</p>
+                    <p>• <strong>Vertical</strong> = Energy score (0-100): how intense/calm the song feels</p>
+                    <p class="bottom-line">🎯 Hover over any dot to see the song name, artist, and exact scores.</p>
+                </div>
+                <div id="emotion-scatter" class="chart-container"></div>
+                <div class="story-box">
+                    <span class="story-title">What the Data Shows</span>
+                    <p>• Your 24 songs span multiple emotional zones, while validation artists cluster more tightly</p>
+                    <p>• This diversity is a factual observation from the plotted data—not an interpretation</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🌊 Lyric Emotions Over Time</h2>
+                <div class="key-finding">
+                    <span class="label">Measuring Emotions</span>
+                    <div class="statement">What is NRC Emotion Lexicon?</div>
+                    <div class="evidence">
+                        It is a way to measure how a word envoke emotions based on the word itself in a given context. It counts how many times an emotion in a given passage (or in this case, song)
+                        shows up.
+                    </div>
+                </div>
+                <div class="story-box">
+                    <span class="story-title">What This Visual Shows</span>
+                    <p>This streamgraph displays the frequency of 8 emotions in your lyrics, ordered by actual release date:</p>
+                    <p>• The taller the 'mountain' is for a song, the more popular that song is</p>
+                    <p>• This streamgraph shows all 11 original songs</p>
+                    <p>• Thicker color bands = more words associated with that emotion in that song</p>
+                    <p class="bottom-line">🎯 Hover to see exact counts per song/emotion</p>
+                </div>
+                <div id="emotion-stream" class="chart-container"></div>
+                <div class="story-box">
+                    <span class="story-title">What the Code Calculates</span>
+                    <p>• Tokenizes lyrics, removes stop words, joins with NRC lexicon</p>
+                    <p>• Counts emotion occurrences per song, fills missing emotions with 0</p>
+                    <p>• Plots with smooth interpolation for visual flow</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>✅ Does This Work on Other Artists?</h2>
+                <div class="story-box">
+                    <span class="story-title">Why Validation Matters</span>
+                    <p>We applied your core model (trained on 80% of Wendlo songs using set.seed(301)) to May Erlewine and Jackie Evans' songs to test if the patterns hold beyond your catalog.</p>
+                    <p class="bottom-line">🎯 This checks whether the findings are specific to Wendlo or more general.</p>
+                </div>
+                <h3>Validation Performance</h3>
+                <table>
+                    <thead><tr><th>Metric</th><th>Value</th><th>Interpretation</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Adjusted R² (Training)</strong></td><td>0.28</td><td>Model explains 28% of variation in Wendlo training set</td></tr>
+                        <tr><td><strong>Mean Absolute Error</strong></td><td>±29.0</td><td>Average prediction error on new artists</td></tr>
+                        <tr><td><strong>Pearson Correlation</strong></td><td>-0.10</td><td>No meaningful relationship between predicted and actual</td></tr>
+                    </tbody>
+                </table>
+                <div id="validation-plot" class="chart-container"></div>
+                <div class="key-finding">
+                    <span class="label">Validation Result</span>
+                    <div class="statement">The Model Does NOT Generalize Well</div>
+                    <div class="evidence">
+                        With MAE = ±29.0 and correlation = -0.10 on external artists, the Wendlo-trained model fails to predict popularity for May Erlewine or Jackie Evans. This suggests <strong>your popularity drivers are unique to your catalog</strong>—not universal patterns. This isn't a failure; it means your artistic signature is distinctive.
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>📌 Evidence-Based Summary</h2>
+                <div class="key-finding">
+                    <span class="label">Primary Conclusion</span>
+                    <div class="statement">Happiness is the Only Robust Predictor</div>
+                    <div class="evidence">
+                        After rigorous testing: <strong>Happiness (p=0.038)</strong> maintains significance when controlling for other variables. BPM (p=0.089) and Liveness (p=0.124) do not. This is a factual output from the R code—not an interpretation.
+                    </div>
+                </div>
+                <div class="story-box">
+                    <span class="story-title">What the Analysis Does NOT Tell Us</span>
+                    <p>• <strong>Causation:</strong> Association ≠ causation. Changing Happiness scores doesn't guarantee popularity changes</p>
+                    <p>• <strong>Future prediction:</strong> Results apply to songs with similar characteristics to the training data</p>
+                    <p>• <strong>Audience preferences:</strong> We measured audio/lyric features, not listener demographics</p>
+                    <p>• <strong>Creative direction:</strong> This describes patterns; it does not prescribe artistic choices</p>
+                    <p class="bottom-line">✨ These boundaries protect both scientific integrity and your artistic freedom.</p>
+                </div>
+                <h3>Suggestions on How to Apply These Findings</h3>
+                <ul>
+                    <li>Explore ways to how your songwriting can provoke certains emotions using instruments and words</li>
+                    <li>Create a story that makes your listeners lost in the beat</li>
+                    <li>Perhaps lean more into that raw sound you have created with past songs</li>
+                </ul>
+                <footer class="report-footer">
+                    <p style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.3rem;">Thank You!</p>
+                    <p>All findings are reproducible from the R code in the GitHub repository.</p>
+                    <p
+                        <strong></strong><a href="https://github.com/lholahan/Music-Analysis-for-Wendlo-Spring-26-" target="_blank">
+                        View the statistical tests, ML, and more here on GitHub
+                        </a>
+                    </p>
+                </footer>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        renderEmotionScatter();
+        renderEmotionStream();
+        renderValidationPlot();
+    });
+
+    window.addEventListener('resize', function() {
+        var ids = ['emotion-scatter', 'emotion-stream', 'validation-plot'];
+        for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (el && el.querySelector('.plotly')) { Plotly.Plots.resize(el); }
+        }
+    });
+
+    // === ALL 24 SONGS: Scatter Plot (Happiness vs Energy) ===
+    var wendloScatter = [
+        {name: "Sweet Child O' Mine", x: 42, y: 23}, {name: "Must Be Nice!", x: 78, y: 43},
+        {name: "You Make My Dreams (Come True)", x: 97, y: 39}, {name: "Love Me", x: 38, y: 11},
+        {name: "September", x: 49, y: 18}, {name: "Broken Glass", x: 32, y: 17},
+        {name: "Just you & Me", x: 13, y: 14}, {name: "Wasting Time With You", x: 61, y: 35},
+        {name: "Untethered", x: 50, y: 48}, {name: "Sweet Sleep", x: 14, y: 41},
+        {name: "Shadow", x: 53, y: 48}, {name: "White Christmas", x: 4, y: 23},
+        {name: "Mele Kalikimaka", x: 73, y: 24}, {name: "Soft Spot", x: 16, y: 34},
+        {name: "Santa Baby", x: 78, y: 28}, {name: "Let It Snow", x: 36, y: 27},
+        {name: "Seasick", x: 13, y: 27}, {name: "For Now", x: 7, y: 10},
+        {name: "Wild", x: 8, y: 28}, {name: "Christmas Time is Here", x: 5, y: 18},
+        {name: "Downtown", x: 47, y: 31}, {name: "Never Going to Give You Up", x: 64, y: 21},
+        {name: "I Love You Always Forever", x: 24, y: 19}, {name: "Spenard", x: 50, y: 32}
+    ];
+
+    // === 11 SONGS WITH LYRICS: Streamgraph (ordered by release_date) ===
+    var streamSongs = ["Just you & Me", "Seasick", "Soft Spot", "Sweet Sleep", "Downtown", "Broken Glass", "Shadow", "Wasting Time With You", "Must Be Nice!", "Untethered", "Love Me"];
+    var streamEmotions = {
+        joy: [2, 0, 8, 6, 3, 3, 9, 0, 2, 0, 5],
+        trust: [1, 0, 11, 10, 3, 2, 5, 1, 3, 1, 0],
+        fear: [0, 1, 6, 3, 1, 7, 3, 6, 1, 2, 3],
+        surprise: [1, 0, 2, 7, 1, 4, 4, 0, 3, 2, 1],
+        sadness: [0, 5, 4, 2, 2, 10, 5, 6, 1, 2, 2],
+        disgust: [1, 2, 5, 2, 1, 8, 1, 5, 1, 2, 0],
+        anger: [0, 4, 5, 0, 1, 5, 1, 0, 0, 1, 1],
+        anticipation: [2, 2, 6, 15, 9, 3, 15, 7, 3, 2, 0]
+    };
+    // === VALIDATION: exact predictions from the Wendlo model ===
+    var validationData = [
+        {name: "Days Go By", actual: 48, predicted: 5.23242183012357},
+        {name: "Palm of My Hand", actual: 37, predicted: 0.564146904444263},
+        {name: "America's Daughter", actual: 34, predicted: 4.2915553459109},
+        {name: "What the World Needs Now", actual: 34, predicted: 15.1352366326001},
+        {name: "Anyway", actual: 33, predicted: 4.62734756328627},
+        {name: "Sleep for Days", actual: 46, predicted: 11.9396610160498},
+        {name: "Seven Brides", actual: 46, predicted: 23.9936990125058},
+        {name: "Most of the Time (Live at The Bunker Studio)", actual: 42, predicted: 12.8243431317414},
+        {name: "Growing Old", actual: 37, predicted: 13.3524708230204},
+        {name: "Loving You Always (Live at The Bunker Studio)", actual: 37, predicted: 10.2845472131229}
+    ];
+
+    function renderEmotionScatter() {
+        var container = document.getElementById('emotion-scatter');
+        if (!container) return;
+
+        var maySongs = [
+            {name: "Days Go By", x: 82, y: 40}, {name: "Palm of My Hand", x: 46, y: 33},
+            {name: "America's Daughter", x: 20, y: 17}, {name: "What the World Needs Now", x: 36, y: 8},
+            {name: "Anyway", x: 39, y: 57}
+        ];
+        var jackieSongs = [
+            {name: "Sleep for Days", x: 68, y: 55}, {name: "Seven Brides", x: 46, y: 50},
+            {name: "Most of the Time", x: 32, y: 16}, {name: "Growing Old", x: 11, y: 23},
+            {name: "Loving You Always", x: 23, y: 6}
+        ];
+
+        var trace1 = {
+            x: wendloScatter.map(function(s) { return s.x; }),
+            y: wendloScatter.map(function(s) { return s.y; }),
+            text: wendloScatter.map(function(s) {
+                return '<b>' + s.name + '</b><br>Artist: Wendlo<br>Happiness: ' + s.x + '<br>Energy: ' + s.y;
+            }),
+            mode: 'markers',
+            marker: { size: 11, color: '#C56B2F', line: {color: 'white', width: 2} },
+            name: 'Wendlo', hovertemplate: '%{text}<extra></extra>', showlegend: true
+        };
+        var trace2 = {
+            x: maySongs.map(function(s) { return s.x; }), y: maySongs.map(function(s) { return s.y; }),
+            text: maySongs.map(function(s) {
+                return '<b>' + s.name + '</b><br>Artist: May Erlewine<br>Happiness: ' + s.x + '<br>Energy: ' + s.y;
+            }),
+            mode: 'markers', marker: { size: 8, color: '#6F3C8E' },
+            name: 'May Erlewine', hovertemplate: '%{text}<extra></extra>', showlegend: true
+        };
+        var trace3 = {
+            x: jackieSongs.map(function(s) { return s.x; }), y: jackieSongs.map(function(s) { return s.y; }),
+            text: jackieSongs.map(function(s) {
+                return '<b>' + s.name + '</b><br>Artist: Jackie Evans<br>Happiness: ' + s.x + '<br>Energy: ' + s.y;
+            }),
+            mode: 'markers', marker: { size: 8, color: '#6E9655' },
+            name: 'Jackie Evans', hovertemplate: '%{text}<extra></extra>', showlegend: true
+        };
+
+        Plotly.newPlot('emotion-scatter', [trace1, trace2, trace3], {
+            margin: {l: 48, r: 12, t: 12, b: 42},
+            xaxis: { title: '😊 Uplifting Feeling (Happiness)', range: [0, 100], gridcolor: '#E8DCCA', tickfont: {size: 10}, automargin: true },
+            yaxis: { title: '⚡ Intensity Level (Energy)', range: [0, 100], gridcolor: '#E8DCCA', tickfont: {size: 10}, automargin: true },
+            plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
+            shapes: [
+                { type: 'line', x0: 50, x1: 50, y0: 0, y1: 100, line: {color: '#C56B2F', width: 1.3, dash: 'dot'} },
+                { type: 'line', x0: 0, x1: 100, y0: 50, y1: 50, line: {color: '#C56B2F', width: 1.3, dash: 'dot'} }
+            ],
+            hovermode: 'closest', font: {family: 'Segoe UI, sans-serif', size: 10},
+            legend: {x: 0.02, y: 0.97, xanchor: 'left', yanchor: 'top', font: {size: 9}}
+        }, { responsive: true, displayModeBar: false });
+    }
+
+    function renderEmotionStream() {
+        var container = document.getElementById('emotion-stream');
+        if (!container) return;
+
+        var emotionLevels = ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"];
+        var colors = {
+            joy: "#44AF69", trust: "#74C69D", fear: "#56CFE1", surprise: "#8E72D9",
+            sadness: "#4D96FF", disgust: "#B565A7", anger: "#E76F51", anticipation: "#F4A261"
+        };
+
+        var traces = emotionLevels.map(function(emo) {
+            return {
+                x: streamSongs.map(function(_, i) { return i; }),
+                y: streamEmotions[emo],
+                mode: 'lines', fill: 'tonexty', stackgroup: 'one',
+                line: {shape: 'spline', width: 1.8, color: colors[emo]},
+                fillcolor: colors[emo] + 'CC',
+                name: emo.charAt(0).toUpperCase() + emo.slice(1),
+                hovertemplate: '<b>%{x}</b><br>' + emo + ': %{y}<extra></extra>',
+                showlegend: false
+            };
+        });
+
+        var legendTraces = emotionLevels.map(function(emo) {
+            return {
+                x: [0], y: [0], mode: 'lines', line: { color: colors[emo], width: 13 },
+                showlegend: true, name: emo.charAt(0).toUpperCase() + emo.slice(1), hoverinfo: 'skip'
+            };
+        });
+
+        var tickTexts = streamSongs.map(function(s) {
+            return s.length > 11 ? s.substring(0, 9) + '…' : s;
+        });
+
+        Plotly.newPlot('emotion-stream', traces.concat(legendTraces), {
+            margin: {l: 42, r: 12, t: 12, b: 78},
+            xaxis: {
+                title: 'Release Order (2017 → 2026)', tickmode: 'array',
+                tickvals: streamSongs.map(function(_, i) { return i; }), ticktext: tickTexts,
+                tickangle: -28, tickfont: {size: 8}, gridcolor: '#E8DCCA', automargin: true
+            },
+            yaxis: { title: 'Word Count', gridcolor: '#E8DCCA', tickfont: {size: 9}, automargin: true },
+            plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
+            hovermode: 'x unified', font: {family: 'Segoe UI, sans-serif', size: 9},
+            legend: { orientation: 'h', y: -0.24, x: 0.5, xanchor: 'center', font: {size: 8} }
+        }, { responsive: true, displayModeBar: false });
+    }
+
+    function renderValidationPlot() {
+        var container = document.getElementById('validation-plot');
+        if (!container) return;
+
+        var trace = {
+            x: validationData.map(function(d) { return d.actual; }),
+            y: validationData.map(function(d) { return d.predicted; }),
+            text: validationData.map(function(d) { return d.name; }),
+            mode: 'markers',
+            marker: { size: 9, color: '#6F3C8E', line: {color: 'white', width: 2} },
+            hovertemplate: '<b>%{text}</b><br>Actual: %{x}<br>Predicted: %{y:.1f}<extra></extra>',
+            showlegend: false
+        };
+        var refLine = {
+            x: [25, 55], y: [25, 55], mode: 'lines',
+            line: { color: '#C56B2F', width: 1.3, dash: 'dot' },
+            hoverinfo: 'skip', showlegend: true, name: 'Perfect Prediction'
+        };
+
+        Plotly.newPlot('validation-plot', [trace, refLine], {
+            margin: {l: 50, r: 12, t: 12, b: 42},
+            xaxis: { title: 'Actual Popularity', range: [25, 55], gridcolor: '#E8DCCA', tickfont: {size: 10}, automargin: true },
+            yaxis: { title: 'Predicted Popularity', range: [-15, 50], gridcolor: '#E8DCCA', tickfont: {size: 10}, automargin: true },
+            plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
+            shapes: [{ type: 'line', x0: 25, x1: 55, y0: 25, y1: 55, line: {color: '#C56B2F', width: 1.3, dash: 'dot'} }],
+            annotations: [{x: 52, y: 28, text: 'y = x', showarrow: false, font: {size: 9, color: '#C56B2F'}}],
+            hovermode: 'closest', font: {family: 'Segoe UI, sans-serif', size: 10},
+            legend: {x: 0.02, y: 0.97, xanchor: 'left', yanchor: 'top', font: {size: 9}}
+        }, { responsive: true, displayModeBar: false });
+    }
+    </script>
+</body>
+</html>
