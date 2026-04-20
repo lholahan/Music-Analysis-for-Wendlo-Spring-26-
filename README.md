@@ -28,7 +28,7 @@ This suggests Wendlo’s success is tied to a distinct, personal style
 🚀 How to Use This Project (No Technical Experience Needed)
 👀 Option 1: View the Report (Recommended)
 Find the file:
-detailed report on Wendlo's popularity.html
+detailed_report_on_Wendlo's_popularity.html
 Open it:
 Double-click the file
 Or right-click → “Open with” → choose a web browser (Chrome, Safari, Edge)
@@ -63,15 +63,15 @@ Click Run (or press Ctrl + Enter)
 📁 File Guide
 detailed report on Wendlo's popularity.html
 → Interactive report with visuals and explanations (start here)
-statistical testing for Wendlo on popularity.R
+statistical_testing_for_Wendlo_on_popularity.R
 → Contains all statistical models and testing code
 
 ⚠️ Limitations
 Results show correlation, not causation
-Based on a small dataset (24 songs)
+based on a small dataset (24 songs)
+
 Does not include:
-Audience demographics
-Marketing or release strategy
+Audience demographics, marketing, or release strategy
 
 💡 Practical Takeaways
 Emotional tone—especially uplifting “happiness”—matters most
