@@ -1,5 +1,6 @@
 # Music-Analysis-for-Wendlo-Spring-26-
 🎵 Wendlo Music Popularity Analysis
+
 📌 Project Overview
 
 This project analyzes what drives song popularity in Wendlo’s music catalog using Spotify audio features, lyric emotion analysis, and statistical modeling.
