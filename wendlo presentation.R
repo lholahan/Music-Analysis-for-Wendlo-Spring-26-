@@ -1232,3 +1232,78 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server)
+
+# =====================================================================
+# EXPORT TO HTML WITH FULL 24-SONG DATA
+# =====================================================================
+library(jsonlite)
+library(htmltools)
+
+# --- Prepare scatter plot data from spotify() (24 songs) ---
+spotify_df <- data.frame(
+  Song_Title = c(
+    "Sweet Child O' Mine","Must Be Nice!","You Make My Dreams (Come True)","Love Me","September",
+    "Broken Glass","Just you & Me","Wasting Time With You","Untethered","Sweet Sleep","Shadow",
+    "White Christmas","Mele Kalikimaka","Soft Spot","Santa Baby","Let It Snow","Seasick",
+    "For Now","Wild","Christmas Time is Here","Downtown","Never Going to Give You Up",
+    "I Love You Always Forever","Spenard"),
+  Happiness = c(42,78,97,38,49,32,13,61,50,14,53,4,73,16,78,36,13,7,8,5,47,64,24,50),
+  Energy = c(23,43,39,11,18,17,14,35,48,41,48,23,24,34,28,27,27,10,28,18,31,21,19,32),
+  stringsAsFactors = FALSE
+)
+
+scatter_data <- lapply(seq_len(nrow(spotify_df)), function(i) {
+  list(
+    name = spotify_df$Song_Title[i],
+    x = as.numeric(spotify_df$Happiness[i]),
+    y = as.numeric(spotify_df$Energy[i])
+  )
+})
+
+# --- Prepare streamgraph data from lyrics_df (ordered by release_date) ---
+# Use the dynamic song_order logic from your R code
+song_order <- lyrics_df %>%
+  arrange(release_date, song) %>%
+  pull(song) %>%
+  unique()
+
+# Re-run emotion counting (same logic as your renderPlotly block)
+emotion_levels <- c("joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation")
+lyric_tokens <- tidytext::unnest_tokens(lyrics_df[, c("song", "lyrics")], word, lyrics)
+lyric_tokens <- dplyr::anti_join(lyric_tokens, tidytext::stop_words, by = "word")
+emotion_df <- dplyr::inner_join(lyric_tokens, tidytext::get_sentiments("nrc"), by = "word")
+emotion_df <- emotion_df[emotion_df$sentiment %in% emotion_levels, ]
+emotion_df <- dplyr::count(emotion_df, song, sentiment, name = "amount")
+emotion_df <- tidyr::complete(emotion_df, song, sentiment = emotion_levels, fill = list(amount = 0))
+
+# Build emotion_counts list matching song_order
+emotion_counts <- list()
+for (emo in emotion_levels) {
+  sub <- emotion_df[emotion_df$sentiment == emo, ]
+  counts <- setNames(rep(0, length(song_order)), song_order)
+  counts[sub$song] <- sub$amount
+  emotion_counts[[emo]] <- as.integer(counts)
+}
+
+# --- Build export object ---
+export_data <- list(
+  songs = as.list(song_order),
+  release_dates = as.list(as.character(lyrics_df$release_date[match(song_order, lyrics_df$song)])),
+  emotion_counts = emotion_counts,
+  scatter_data = scatter_data
+)
+
+# Convert to clean JSON
+json_payload <- toJSON(export_data, auto_unbox = TRUE)
+
+# --- Read HTML template and inject ---
+html_file <- "Wendlo_Report_Template.html"  # <-- Save your HTML with the script block above as this file
+html_content <- readLines(html_file, warn = FALSE)
+
+# Replace placeholder JSON
+placeholder <- '{"songs":[],"release_dates":[],"emotion_counts":{},"scatter_data":[]}'
+html_content <- gsub(placeholder, json_payload, html_content, fixed = TRUE)
+
+# Save final report
+writeLines(html_content, "Wendlo_Report_24Songs.html")
+cat("✅ Exported to Wendlo_Report_24Songs.html with", length(song_order), "songs in streamgraph and", length(scatter_data), "songs in scatter plot\n")
