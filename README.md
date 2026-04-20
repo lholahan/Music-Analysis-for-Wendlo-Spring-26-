@@ -55,7 +55,7 @@ Install:
 R → https://cran.r-project.org/
 RStudio → https://posit.co/download/rstudio-desktop/
 Open the file:
-statistical testing for Wendlo on popularity.R
+statistical_testing_for_Wendlo_on_popularity.R
 Click Run (or press Ctrl + Enter)
 
 👉 This will rerun all statistical tests used in the project
