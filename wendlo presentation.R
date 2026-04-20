@@ -770,20 +770,7 @@ server <- function(input, output, session) {
       anticipation = "#F4A261"
     )
     
-    # 🔑 HARD-CODED ORDER (by release date)
-    song_order <- c(
-      "Just You & Me",
-      "Soft Spot",
-      "Seasick",
-      "Sweet Sleep",
-      "Downtown",
-      "Broken Glass",
-      "Shadow",
-      "Wasting Time With You",
-      "Must Be Nice",
-      "Untethered",
-      "Love Me"
-    )
+    song_order <- lyrics_release_order$release_label
     
     lyric_tokens <- tidytext::unnest_tokens(
       lyrics_df[, c("song", "lyrics")],
