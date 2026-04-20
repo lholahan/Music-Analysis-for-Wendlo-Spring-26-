@@ -760,17 +760,15 @@ server <- function(input, output, session) {
                         "sadness", "disgust", "anger", "anticipation")
     
     emotion_colors <- c(
-      joy = "#44AF69",
-      trust = "#74C69D",
-      fear = "#56CFE1",
-      surprise = "#8E72D9",
-      sadness = "#4D96FF",
-      disgust = "#B565A7",
-      anger = "#E76F51",
-      anticipation = "#F4A261"
+      joy = "#44AF69", trust = "#74C69D", fear = "#56CFE1", surprise = "#8E72D9",
+      sadness = "#4D96FF", disgust = "#B565A7", anger = "#E76F51", anticipation = "#F4A261"
     )
     
-    song_order <- lyrics_release_order$release_label
+    # 🔑 DYNAMIC ORDER: Automatically pulls & sorts by release date
+    song_order <- lyrics_df %>%
+      arrange(release_date, song) %>%
+      pull(song) %>%
+      unique()
     
     lyric_tokens <- tidytext::unnest_tokens(
       lyrics_df[, c("song", "lyrics")],
@@ -806,7 +804,7 @@ server <- function(input, output, session) {
       fill = list(amount = 0)
     )
     
-    # 🔑 APPLY FIXED ORDER
+    # 🔑 APPLY DYNAMIC ORDER
     emotion_df$song_index <- as.numeric(factor(emotion_df$song, levels = song_order))
     emotion_df <- emotion_df[order(emotion_df$song_index), ]
     
