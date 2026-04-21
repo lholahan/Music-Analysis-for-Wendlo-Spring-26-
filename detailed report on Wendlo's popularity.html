@@ -416,36 +416,42 @@
         }, { responsive: true, displayModeBar: false });
     }
 
-    function renderValidationPlot() {
-        var container = document.getElementById('validation-plot');
-        if (!container) return;
+function renderValidationPlot() {
+    var container = document.getElementById('validation-plot');
+    if (!container) return;
 
-        var trace = {
-            x: validationData.map(function(d) { return d.actual; }),
-            y: validationData.map(function(d) { return d.predicted; }),
-            text: validationData.map(function(d) { return d.name; }),
-            mode: 'markers',
-            marker: { size: 9, color: '#6F3C8E', line: {color: 'white', width: 2} },
-            hovertemplate: '<b>%{text}</b><br>Actual: %{x}<br>Predicted: %{y:.1f}<extra></extra>',
-            showlegend: false
-        };
-        var refLine = {
-            x: [25, 55], y: [25, 55], mode: 'lines',
-            line: { color: '#C56B2F', width: 1.3, dash: 'dot' },
-            hoverinfo: 'skip', showlegend: true, name: 'Perfect Prediction'
-        };
+    var trace = {
+        x: validationData.map(function(d) { return d.actual; }),
+        y: validationData.map(function(d) { return d.predicted; }),
+        text: validationData.map(function(d) { return d.name; }),
+        mode: 'markers',
+        marker: { size: 9, color: '#6F3C8E', line: {color: 'white', width: 2} },
+        hovertemplate: '<b>%{text}</b><br>Actual: %{x}<br>Predicted: %{y:.1f}<extra></extra>',
+        showlegend: false
+    };
 
-        Plotly.newPlot('validation-plot', [trace, refLine], {
-            margin: {l: 50, r: 12, t: 12, b: 42},
-            xaxis: { title: 'Actual Popularity', range: [25, 55], gridcolor: '#E8DCCA', tickfont: {size: 10}, automargin: true },
-            yaxis: { title: 'Predicted Popularity', range: [-15, 50], gridcolor: '#E8DCCA', tickfont: {size: 10}, automargin: true },
-            plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
-            shapes: [{ type: 'line', x0: 25, x1: 55, y0: 25, y1: 55, line: {color: '#C56B2F', width: 1.3, dash: 'dot'} }],
-            annotations: [{x: 52, y: 28, text: 'y = x', showarrow: false, font: {size: 9, color: '#C56B2F'}}],
-            hovermode: 'closest', font: {family: 'Segoe UI, sans-serif', size: 10},
-            legend: {x: 0.02, y: 0.97, xanchor: 'left', yanchor: 'top', font: {size: 9}}
-        }, { responsive: true, displayModeBar: false });
-    }
+    Plotly.newPlot('validation-plot', [trace], {
+        margin: {l: 50, r: 12, t: 12, b: 42},
+        xaxis: {
+            title: 'Actual Popularity',
+            range: [25, 55],
+            gridcolor: '#E8DCCA',
+            tickfont: {size: 10},
+            automargin: true
+        },
+        yaxis: {
+            title: 'Predicted Popularity',
+            range: [-15, 50],
+            gridcolor: '#E8DCCA',
+            tickfont: {size: 10},
+            automargin: true
+        },
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        hovermode: 'closest',
+        font: {family: 'Segoe UI, sans-serif', size: 10}
+    }, { responsive: true, displayModeBar: false });
+}
     </script>
 </body>
 </html>
